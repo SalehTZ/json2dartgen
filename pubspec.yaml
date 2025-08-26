@@ -1,0 +1,19 @@
+name: json2dartgen
+description: A CLI tool to generate Dart models from JSON, with json_serializable support and copyWith methods.
+version: 1.0.0
+homepage: https://github.com/SalehTZ/json2dartgen
+
+environment:
+  sdk: ^3.9.0
+
+# Add regular dependencies here.
+dependencies:
+  path: ^1.9.0
+  args: ^2.7.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6
+
+executables:
+  json2dartgen: bin/json2dartgen.dart

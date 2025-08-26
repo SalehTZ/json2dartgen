@@ -1,6 +1,28 @@
+/// A utility class that generates Dart model classes from JSON data.
+///
+/// This class provides functionality to convert JSON data into strongly-typed
+/// Dart classes with proper serialization/deserialization support using
+/// `json_annotation` package.
+///
+/// Features:
+/// - Supports nested objects and arrays
+/// - Handles both camelCase and snake_case property names
+/// - Generates `copyWith` methods for immutable classes
+/// - Supports custom JSON key names via `@JsonKey` annotations
+/// - Handles basic Dart types (int, double, bool, String) and custom objects
 class JsonToDartGenerator {
+  /// Cache of generated class definitions to avoid duplicates
   final Map<String, String> generatedClasses = {};
 
+  /// Generates a Dart class from JSON data.
+  ///
+  /// [className] The name of the generated Dart class
+  /// [json] The JSON data to generate the class from (can be Map or List)
+  /// [useCamelCase] Whether to convert snake_case property names to camelCase
+  ///
+  /// Returns the generated Dart class as a String
+  ///
+  /// Throws [ArgumentError] if the root JSON is not an object or array
   String generate(String className, dynamic json, {bool useCamelCase = false}) {
     if (json is Map<String, dynamic>) {
       return _generateClass(className, json, useCamelCase: useCamelCase);
@@ -15,6 +37,13 @@ class JsonToDartGenerator {
     }
   }
 
+  /// Generates multiple model classes from a JSON object where each top-level
+  /// property becomes a separate model class.
+  ///
+  /// [json] The JSON data containing multiple models
+  /// [useCamelCase] Whether to convert snake_case property names to camelCase
+  ///
+  /// Returns a map of class names to their generated Dart code
   Map<String, String> generateModels(
     Map<String, dynamic> json, {
     bool useCamelCase = false,
@@ -26,6 +55,7 @@ class JsonToDartGenerator {
     return Map.of(generatedClasses); // return copy
   }
 
+  /// Internal method to generate a single class definition
   String _generateClass(
     String className,
     Map<String, dynamic> json, {
@@ -112,16 +142,24 @@ class JsonToDartGenerator {
     return code;
   }
 
-  /// Converts snake_case → camelCase
+  /// Converts snake_case to camelCase
+  ///
+  /// Example: 'user_name' → 'userName'
   String _toCamelCase(String s) {
     if (!s.contains('_')) return s;
     final parts = s.split('_');
     return parts.first + parts.skip(1).map((w) => _capitalize(w)).join();
   }
 
+  /// Capitalizes the first letter of a string
+  ///
+  /// Example: 'user' → 'User'
   String _capitalize(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
+  /// Infers the appropriate Dart type for a given JSON value
+  ///
+  /// Handles basic types and recursively processes nested objects and lists
   String _inferType(String key, dynamic value) {
     if (value is int) return 'int';
     if (value is double) return 'double';

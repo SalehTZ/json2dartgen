@@ -4,6 +4,14 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:json2dartgen/json2dartgen.dart';
 
+/// The entry point of the `json2dartgen` CLI tool.
+///
+/// This function parses the command line arguments and calls the
+/// [JsonToDartGenerator.generateModels] method to generate Dart models from
+/// JSON files.
+///
+/// The `arguments` parameter is a list of command line arguments passed to the
+/// tool.
 void main(List<String> arguments) {
   final parser = ArgParser()
     ..addFlag(

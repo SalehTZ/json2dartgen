@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:json2dartgen/generator.dart';
+import 'package:json2dartgen/json2dartgen.dart';
 
 void main(List<String> arguments) {
   final parser = ArgParser()

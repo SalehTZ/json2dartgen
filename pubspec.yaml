@@ -15,5 +15,3 @@ dev_dependencies:
   lints: ^6.0.0
   test: ^1.25.6
 
-executables:
-  json2dartgen: bin/json2dartgen.dart

@@ -1,4 +1,4 @@
-import 'package:json2dartgen/generator.dart';
+import 'package:json2dartgen/json2dartgen.dart';
 import 'package:test/test.dart';
 
 void main() {

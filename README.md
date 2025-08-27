@@ -34,7 +34,7 @@ dart pub global activate json2dartgen
 ### Usage
 
 ```bash
-json2dartgen <input.json> [options]
+dart run json2dartgen <input.json> [options]
 ```
 
 **Options:**
@@ -43,6 +43,7 @@ json2dartgen <input.json> [options]
 | ------------------ | --------------------------------------------------------------- |
 | `-c, --camel-case` | Convert snake\_case JSON keys to camelCase field names          |
 | `-o, --output-dir` | Output directory for `.dart` files (default: current directory) |
+| `-n, --nullable-copywith` | Generate nullable copyWith method with ability to null non-nullables |
 | `-h, --help`       | Show usage instructions                                         |
 
 ---
@@ -52,19 +53,19 @@ json2dartgen <input.json> [options]
 Generate models in the current directory:
 
 ```bash
-json2dartgen api_response.json
+dart run json2dartgen api_response.json
 ```
 
 Generate models with camelCase fields:
 
 ```bash
-json2dartgen api_response.json --camel-case
+dart run json2dartgen api_response.json --camel-case
 ```
 
 Generate models in a specific directory:
 
 ```bash
-json2dartgen api_response.json --camel-case --output-dir lib/models
+dart run json2dartgen api_response.json --camel-case --output-dir lib/models
 ```
 
 ---

@@ -62,11 +62,12 @@ void main() {
   };
 
   print('\n// Example 3: Generate multiple models\n');
-  final models = generator.generateModels(multiModelJson, useCamelCase: true);
-  models.forEach((className, code) {
-    print('// $className class\n');
-    print(code);
-  });
+  final models = generator.generate(
+    'MultiModel',
+    multiModelJson,
+    useCamelCase: true,
+  );
+  print(models);
 
   // Example 4: Using the generated code (simulated)
   print('\n// Example 4: Using the generated models\n');

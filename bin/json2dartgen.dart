@@ -28,6 +28,12 @@ void main(List<String> arguments) {
           'Defaults to current directory if not provided.',
     )
     ..addFlag(
+      'nullable-copywith',
+      abbr: 'n',
+      negatable: false,
+      help: 'Generate nullable copyWith method with ability to null values',
+    )
+    ..addFlag(
       'help',
       abbr: 'h',
       negatable: false,
@@ -53,21 +59,26 @@ void main(List<String> arguments) {
 
   final inputFile = argResults.rest.first;
   final useCamelCase = argResults['camel-case'] as bool;
+  final useNullableCopyWith = argResults['nullable-copywith'] as bool;
   final outputDir =
       argResults['output-dir'] as String? ?? Directory.current.path;
 
   final raw = File(inputFile).readAsStringSync();
   final jsonData = jsonDecode(raw);
 
-  final classes = JsonToDartGenerator().generateModels(
+  final generator = JsonToDartGenerator();
+
+  generator.generate(
+    'Model',
     jsonData,
     useCamelCase: useCamelCase,
+    useNullableCopyWith: useNullableCopyWith,
   );
 
   final dir = Directory(outputDir);
   if (!dir.existsSync()) dir.createSync(recursive: true);
 
-  for (final entry in classes.entries) {
+  for (final entry in generator.generatedClasses.entries) {
     final fileName = '${entry.key.toLowerCase()}.dart';
     final outFile = File('${dir.path}/$fileName');
     outFile.writeAsStringSync(entry.value);

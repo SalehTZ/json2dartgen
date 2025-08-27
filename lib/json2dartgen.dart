@@ -19,40 +19,37 @@ class JsonToDartGenerator {
   /// [className] The name of the generated Dart class
   /// [json] The JSON data to generate the class from (can be Map or List)
   /// [useCamelCase] Whether to convert snake_case property names to camelCase
+  /// [useNullableCopyWith] Whether to generate nullable copyWith method with ability to null values
   ///
   /// Returns the generated Dart class as a String
   ///
   /// Throws [ArgumentError] if the root JSON is not an object or array
-  String generate(String className, dynamic json, {bool useCamelCase = false}) {
+  String generate(
+    String className,
+    dynamic json, {
+    bool useCamelCase = false,
+    bool useNullableCopyWith = false,
+  }) {
+    if (json == null) {
+      throw ArgumentError('JSON data cannot be null');
+    }
     if (json is Map<String, dynamic>) {
-      return _generateClass(className, json, useCamelCase: useCamelCase);
+      return _generateClass(
+        className,
+        json,
+        useCamelCase: useCamelCase,
+        useNullableCopyWith: useNullableCopyWith,
+      );
     } else if (json is List) {
       return generate(
         className,
         json.isNotEmpty ? json.first : {},
         useCamelCase: useCamelCase,
+        useNullableCopyWith: useNullableCopyWith,
       );
     } else {
       throw ArgumentError('Root must be object or array');
     }
-  }
-
-  /// Generates multiple model classes from a JSON object where each top-level
-  /// property becomes a separate model class.
-  ///
-  /// [json] The JSON data containing multiple models
-  /// [useCamelCase] Whether to convert snake_case property names to camelCase
-  ///
-  /// Returns a map of class names to their generated Dart code
-  Map<String, String> generateModels(
-    Map<String, dynamic> json, {
-    bool useCamelCase = false,
-  }) {
-    generatedClasses.clear();
-
-    _generateClass('Root', json, useCamelCase: useCamelCase);
-
-    return Map.of(generatedClasses); // return copy
   }
 
   /// Internal method to generate a single class definition
@@ -60,6 +57,7 @@ class JsonToDartGenerator {
     String className,
     Map<String, dynamic> json, {
     required bool useCamelCase,
+    bool useNullableCopyWith = false,
   }) {
     if (generatedClasses.containsKey(className)) {
       return generatedClasses[className]!;
@@ -85,41 +83,19 @@ class JsonToDartGenerator {
     });
 
     // constructor
-    buffer.write('  const $className({');
-    buffer.write(
-      json.keys
-          .map((k) => 'required this.${useCamelCase ? _toCamelCase(k) : k}')
-          .join(', '),
-    );
-    buffer.writeln('});');
+    _writeToBufferConstructor(buffer, className, json, useCamelCase);
 
     // copyWith
-    buffer.writeln('');
-    buffer.writeln('  $className copyWith({');
-    json.forEach((key, value) {
-      final dartName = useCamelCase ? _toCamelCase(key) : key;
-      final type = _inferType(dartName, value);
-      buffer.writeln('    $type? $dartName,');
-    });
-    buffer.writeln('  }) {');
-    buffer.writeln('    return $className(');
-    json.forEach((key, value) {
-      final dartName = useCamelCase ? _toCamelCase(key) : key;
-      buffer.writeln('      $dartName: $dartName ?? this.$dartName,');
-    });
-    buffer.writeln('    );');
-    buffer.writeln('  }');
+    _writeToBufferCopyWith(
+      buffer,
+      className,
+      json,
+      useCamelCase,
+      useNullableCopyWith: useNullableCopyWith,
+    );
 
     // fromJson / toJson
-    buffer.writeln('');
-    buffer.writeln(
-      '  factory $className.fromJson(Map<String, dynamic> json) =>',
-    );
-    buffer.writeln('      _\$${className}FromJson(json);');
-    buffer.writeln('');
-    buffer.writeln(
-      '  Map<String, dynamic> toJson() => _\$${className}ToJson(this);',
-    );
+    _writeToBufferToJsonFromJson(buffer, className);
 
     buffer.writeln('}');
 
@@ -140,6 +116,84 @@ class JsonToDartGenerator {
     });
 
     return code;
+  }
+
+  void _writeToBufferConstructor(
+    StringBuffer buffer,
+    String className,
+    Map<String, dynamic> json,
+    bool useCamelCase,
+  ) {
+    buffer.write('  const $className({');
+    buffer.write(
+      json.keys
+          .map((k) => 'required this.${useCamelCase ? _toCamelCase(k) : k}')
+          .join(', '),
+    );
+    buffer.writeln('});');
+  }
+
+  void _writeToBufferCopyWith(
+    StringBuffer buffer,
+    String className,
+    Map<String, dynamic> json,
+    bool useCamelCase, {
+    bool useNullableCopyWith = false,
+  }) {
+    buffer.writeln('');
+
+    if (useNullableCopyWith) {
+      // Add sentinel
+      buffer.writeln('  static const _sentinel = Object();');
+      buffer.writeln('');
+
+      buffer.writeln('  $className copyWith({');
+      json.forEach((key, value) {
+        final dartName = useCamelCase ? _toCamelCase(key) : key;
+        buffer.writeln('    Object? $dartName = _sentinel,');
+      });
+      buffer.writeln('  }) {');
+      buffer.writeln('    return $className(');
+
+      json.forEach((key, value) {
+        final dartName = useCamelCase ? _toCamelCase(key) : key;
+        final type = _inferType(dartName, value);
+        buffer.writeln(
+          '      $dartName: identical($dartName, _sentinel) ? this.$dartName : $dartName as $type,',
+        );
+      });
+
+      buffer.writeln('    );');
+      buffer.writeln('  }');
+    } else {
+      // Default style
+      buffer.writeln('  $className copyWith({');
+      json.forEach((key, value) {
+        final dartName = useCamelCase ? _toCamelCase(key) : key;
+        final type = _inferType(dartName, value);
+        buffer.writeln('    $type? $dartName,');
+      });
+      buffer.writeln('  }) {');
+      buffer.writeln('    return $className(');
+      json.forEach((key, value) {
+        final dartName = useCamelCase ? _toCamelCase(key) : key;
+        buffer.writeln('      $dartName: $dartName ?? this.$dartName,');
+      });
+      buffer.writeln('    );');
+      buffer.writeln('  }');
+    }
+  }
+
+  void _writeToBufferToJsonFromJson(StringBuffer buffer, String className) {
+    buffer.writeln('');
+    buffer.writeln(
+      '  factory $className.fromJson(Map<String, dynamic> json) =>',
+    );
+    buffer.writeln('      _\$${className}FromJson(json);');
+    buffer.writeln('');
+    buffer.writeln(
+      '  Map<String, dynamic> toJson() => _\$${className}ToJson(this);',
+    );
   }
 
   /// Converts snake_case to camelCase

@@ -43,6 +43,7 @@ dart run json2dartgen <input.json> [options]
 | ------------------ | --------------------------------------------------------------- |
 | `-c, --camel-case` | Convert snake\_case JSON keys to camelCase field names          |
 | `-o, --output-dir` | Output directory for `.dart` files (default: current directory) |
+| `-n, --nullable-copywith` | Generate nullable copyWith method with ability to null non-nullables |
 | `-h, --help`       | Show usage instructions                                         |
 
 ---

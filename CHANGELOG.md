@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+- Added nullable copyWith method with ability to null non-nullables
+- Added --nullable-copywith flag
+- Minor improvements
+
 ## 1.0.1
 
 - Added example

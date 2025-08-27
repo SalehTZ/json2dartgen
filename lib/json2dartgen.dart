@@ -24,6 +24,9 @@ class JsonToDartGenerator {
   ///
   /// Throws [ArgumentError] if the root JSON is not an object or array
   String generate(String className, dynamic json, {bool useCamelCase = false}) {
+    if (json == null) {
+      throw ArgumentError('JSON data cannot be null');
+    }
     if (json is Map<String, dynamic>) {
       return _generateClass(className, json, useCamelCase: useCamelCase);
     } else if (json is List) {

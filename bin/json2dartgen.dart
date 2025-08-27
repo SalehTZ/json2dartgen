@@ -59,15 +59,14 @@ void main(List<String> arguments) {
   final raw = File(inputFile).readAsStringSync();
   final jsonData = jsonDecode(raw);
 
-  final classes = JsonToDartGenerator().generateModels(
-    jsonData,
-    useCamelCase: useCamelCase,
-  );
+  final generator = JsonToDartGenerator();
+
+  generator.generate('Model', jsonData, useCamelCase: useCamelCase);
 
   final dir = Directory(outputDir);
   if (!dir.existsSync()) dir.createSync(recursive: true);
 
-  for (final entry in classes.entries) {
+  for (final entry in generator.generatedClasses.entries) {
     final fileName = '${entry.key.toLowerCase()}.dart';
     final outFile = File('${dir.path}/$fileName');
     outFile.writeAsStringSync(entry.value);

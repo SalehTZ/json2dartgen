@@ -40,24 +40,6 @@ class JsonToDartGenerator {
     }
   }
 
-  /// Generates multiple model classes from a JSON object where each top-level
-  /// property becomes a separate model class.
-  ///
-  /// [json] The JSON data containing multiple models
-  /// [useCamelCase] Whether to convert snake_case property names to camelCase
-  ///
-  /// Returns a map of class names to their generated Dart code
-  Map<String, String> generateModels(
-    Map<String, dynamic> json, {
-    bool useCamelCase = false,
-  }) {
-    generatedClasses.clear();
-
-    _generateClass('Root', json, useCamelCase: useCamelCase);
-
-    return Map.of(generatedClasses); // return copy
-  }
-
   /// Internal method to generate a single class definition
   String _generateClass(
     String className,
